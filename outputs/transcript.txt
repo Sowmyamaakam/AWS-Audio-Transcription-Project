@@ -1,0 +1,31 @@
+
+================================================================================
+AUDIO TRANSCRIPTION RESULTS
+================================================================================
+
+Job Name: transcribe-job-20251026-075943-d37a199d
+Status: COMPLETED
+
+--------------------------------------------------------------------------------
+FULL TRANSCRIPT
+--------------------------------------------------------------------------------
+The examination and testimony of the experts enabled the commission to conclude that 5 shots may have been fired.
+
+
+--------------------------------------------------------------------------------
+SPEAKER-SEPARATED TRANSCRIPT
+--------------------------------------------------------------------------------
+
+[0:00:00 - 0:00:07] spk_0: The examination and testimony of the experts enabled the commission to conclude that 5 shots may have been fired
+
+
+--------------------------------------------------------------------------------
+CONFIDENCE ANALYSIS
+--------------------------------------------------------------------------------
+Average Confidence: 94.81%
+Highest Confidence: 99.90%
+Lowest Confidence: 0.00%
+Total Words: 20
+
+================================================================================
+
