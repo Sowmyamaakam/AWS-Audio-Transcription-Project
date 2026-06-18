@@ -1,162 +1,324 @@
-# AWS Audio Transcription Project
+# AWS Audio Transcription Studio
 
-## Overview
+<p align="center">
+  <img src="https://img.shields.io/badge/AWS-Lambda-FF9900?style=for-the-badge&logo=awslambda&logoColor=white"/>
+  <img src="https://img.shields.io/badge/AWS-Transcribe-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white"/>
+  <img src="https://img.shields.io/badge/AWS-S3-569A31?style=for-the-badge&logo=amazons3&logoColor=white"/>
+  <img src="https://img.shields.io/badge/AWS-API_Gateway-A100FF?style=for-the-badge&logo=amazon-aws&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Python-boto3-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
+</p>
 
-The **AWS Audio Transcription Project** is a comprehensive solution for converting audio files into text using Amazon Web Services (AWS). This project leverages AWS transcription services to provide accurate, scalable, and cost-effective audio-to-text conversion capabilities.
+<p align="center">
+  <b>Upload audio files or record live — get speaker-separated transcripts in seconds.<br/>
+  Serverless · Speaker Diarization · Real-time Waveform · 6 Audio Formats</b>
+</p>
 
-## Project Description
+---
 
-This project demonstrates how to build a complete audio transcription pipeline using AWS services. It includes:
+## What It Does
 
-- **Audio File Processing**: Support for multiple audio formats (MP3, WAV, FLAC, OGG, etc.)
-- **AWS Transcribe Integration**: Seamless integration with Amazon Transcribe for high-quality speech-to-text conversion
-- **Web Interface**: User-friendly HTML/CSS/JavaScript frontend for uploading and managing transcription jobs
-- **Backend Processing**: Server-side logic to handle file uploads, job management, and result retrieval
-- **Real-time Status Updates**: Monitor transcription job progress and completion status
-- **Output Management**: Store, retrieve, and manage transcription results
+A fully serverless audio transcription pipeline built on AWS. The browser-based frontend lets users either upload existing audio files or record live audio directly, then delivers speaker-labeled transcripts with timestamps — powered entirely by AWS Transcribe's AI speech recognition engine.
 
-## Key Features
+- **Upload or Record** — drop a file or record live from the browser microphone
+- **Speaker Diarization** — up to 10 speakers identified and labeled with timestamps
+- **6 Audio Formats** — MP3, WAV, M4A, MP4, FLAC, OGG
+- **Real-time Waveform** — live audio visualizer via Web Audio API + Canvas during recording
+- **Async Progress Tracking** — real-time status polling with animated progress bar
+- **Local Analysis Tool** — `parse_transcription.py` for detailed confidence score analysis on raw JSON output
 
-✨ **Easy-to-Use Interface**: Simple and intuitive web-based platform for users to upload audio files and initiate transcription
-
-🔄 **Asynchronous Processing**: Non-blocking transcription jobs that allow users to submit files and check status later
-
-📁 **Multiple Format Support**: Handle various audio formats commonly used in production environments
-
-☁️ **AWS Integration**: Direct integration with AWS Transcribe service for reliable and accurate transcriptions
-
-💾 **Result Storage**: Store transcription results for future reference and analysis
-
-🔐 **Security**: Secure handling of audio files and transcription data
-
-## Technologies Used
-
-- **Frontend**: HTML, CSS, JavaScript
-- **Backend**: Python/Node.js (or your specific backend language)
-- **Cloud Services**: 
-  - AWS Transcribe
-  - AWS S3 (for audio storage)
-  - AWS IAM (for authentication and access control)
-- **Database**: DynamoDB (optional, for storing job metadata)
-
-## Getting Started
-
-### Prerequisites
-
-- AWS Account with appropriate permissions
-- AWS CLI configured with credentials
-- Python 3.8+ or Node.js 14+ (depending on backend)
-- Required Python/Node packages (see requirements.txt or package.json)
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/Sowmyamaakam/AWS-Audio-Transcription-Project.git
-cd AWS-Audio-Transcription-Project
-```
-
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-# or
-npm install
-```
-
-3. Configure AWS credentials:
-```bash
-aws configure
-```
-
-4. Set up environment variables:
-```bash
-export AWS_REGION=us-east-1
-export S3_BUCKET_NAME=your-bucket-name
-```
-
-### Usage
-
-1. Start the application:
-```bash
-python app.py
-# or
-npm start
-```
-
-2. Open your browser and navigate to `http://localhost:5000` (or your configured port)
-
-3. Upload an audio file and initiate transcription
-
-4. Track the transcription progress and download results when complete
+---
 
 ## Architecture
 
 ```
-┌─────────────────┐
-│  Web Interface  │
-│  (HTML/CSS/JS)  │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│   Backend API   │
-│ (Python/Node)   │
-└────────┬────────┘
-         │
-    ┌────┴────┐
-    ▼         ▼
-┌────────┐ ┌──────────────┐
-│  S3    │ │ AWS Transcribe
-│ Bucket │ │    Service
-└────────┘ └──────────────┘
+┌─────────────────────────────────┐
+│        Browser Frontend          │
+│  Upload File  |  Record Live     │
+│  (HTML5 + Vanilla JS)            │
+└──────────────┬──────────────────┘
+               │ HTTPS / JSON
+               ▼
+┌─────────────────────────────────┐
+│       Amazon API Gateway         │
+│  POST /upload                    │
+│  GET  /status?jobName=...        │
+│  GET  /result?jobName=...        │
+└──────────────┬──────────────────┘
+               │ Invokes
+               ▼
+┌─────────────────────────────────┐
+│        AWS Lambda (Python)       │
+│  lambda_function.py              │
+│  boto3 · base64 decode           │
+│  Unique job naming (uuid)        │
+└────────┬─────────────┬──────────┘
+         │             │
+         ▼             ▼
+┌──────────────┐ ┌──────────────────────┐
+│  S3 Input    │ │   Amazon Transcribe   │
+│  Bucket      │ │                      │
+│ (audio files)│ │  Speaker Labels ON   │
+└──────────────┘ │  MaxSpeakerLabels=10 │
+                 │  LanguageCode=en-US  │
+                 └──────────┬───────────┘
+                            │ Writes output
+                            ▼
+                 ┌──────────────────────┐
+                 │   S3 Output Bucket   │
+                 │  {jobName}.json      │
+                 │  (Transcribe result) │
+                 └──────────────────────┘
 ```
 
-## Use Cases
+---
 
-- **Transcribing Meeting Recordings**: Convert meeting audio to searchable text
-- **Media Content Processing**: Generate transcripts for videos and podcasts
-- **Accessibility**: Create captions and transcripts for accessibility compliance
-- **Content Analysis**: Extract and analyze spoken content from audio files
-- **Documentation**: Automatically create documentation from recorded sessions
+## Key Features
+
+### Live Browser Recording
+The frontend uses the **MediaRecorder API** to capture microphone audio (WebM format) directly in the browser. A real-time waveform visualizer draws frequency bars using the **Web Audio API** + Canvas during recording.
+
+### Speaker Diarization
+AWS Transcribe's speaker diarization identifies up to **10 distinct speakers** and assigns labeled segments (`spk_0`, `spk_1`, …) with start/end timestamps. The frontend renders each speaker's lines in separate styled blocks.
+
+### Serverless Pipeline
+Zero infrastructure to manage — API Gateway + Lambda handle all traffic. Lambda decodes the base64 audio payload, uploads to S3, and starts an AWS Transcribe job. Results are read from S3 when the job completes.
+
+### Confidence Analysis (Local Tool)
+`parse_transcription.py` processes raw Transcribe JSON output locally and reports:
+- Average, highest, and lowest word-level confidence scores
+- Full transcript and speaker-separated view with timestamps
+- Total word count per job
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Frontend** | HTML5, CSS3 (animations, backdrop-filter), Vanilla JavaScript |
+| **Recording** | MediaRecorder API (WebM), Web Audio API, Canvas API |
+| **Backend** | Python 3.x, AWS Lambda, boto3 |
+| **API Layer** | Amazon API Gateway (REST) |
+| **Speech-to-Text** | Amazon Transcribe (speaker diarization enabled) |
+| **Storage** | Amazon S3 (2 buckets: input audio + output JSON) |
+| **Auth** | AWS IAM (Lambda execution role) |
+| **Local Tool** | Python `parse_transcription.py` (confidence analysis) |
+
+---
 
 ## Project Structure
 
 ```
 AWS-Audio-Transcription-Project/
-├── README.md
-├── requirements.txt
-├── app.py (or index.js)
-├── config.py
-├── templates/
-│   ├── index.html
-│   └── results.html
-├── static/
-│   ├── css/
-│   ├── js/
-│   └── uploads/
-└── utils/
-    └── transcription.py
+├── index.html                  # Browser frontend — upload + live record + results UI
+├── parse_transcription.py      # Local CLI tool — analyze Transcribe JSON output
+└── lambda_code/
+    └── lambda_function.py      # AWS Lambda handler — 3 API endpoints
 ```
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request with improvements or bug fixes.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support
-
-For issues, questions, or suggestions, please open an issue on GitHub or contact the project maintainer.
-
-## References
-
-- [AWS Transcribe Documentation](https://docs.aws.amazon.com/transcribe/)
-- [AWS S3 Documentation](https://docs.aws.amazon.com/s3/)
-- [AWS CLI Documentation](https://docs.aws.amazon.com/cli/)
 
 ---
 
-**Last Updated**: June 2026
-**Author**: Sowmyamaakam
+## API Reference
+
+All endpoints are served through Amazon API Gateway at:
+```
+https://<api-id>.execute-api.us-east-1.amazonaws.com/prod
+```
+
+### `POST /upload`
+
+Accepts base64-encoded audio, uploads to S3, and starts an AWS Transcribe job.
+
+**Request:**
+```json
+{
+  "audioData": "data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAW...",
+  "filename": "meeting.mp3"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Upload successful",
+  "jobName": "web-transcribe-20240618-153042-a3f8c1d2",
+  "s3Key": "20240618-153042-a3f8c1d2.mp3"
+}
+```
+
+---
+
+### `GET /status?jobName=<name>`
+
+Polls the AWS Transcribe job status.
+
+**Response (in progress):**
+```json
+{ "status": "IN_PROGRESS", "jobName": "web-transcribe-..." }
+```
+
+**Response (completed):**
+```json
+{
+  "status": "COMPLETED",
+  "jobName": "web-transcribe-...",
+  "outputUri": "https://s3.amazonaws.com/..."
+}
+```
+
+---
+
+### `GET /result?jobName=<name>`
+
+Fetches the completed transcript from S3 and returns the full text plus speaker-separated segments.
+
+**Response:**
+```json
+{
+  "transcript": "Hello everyone welcome to the meeting. Let us get started.",
+  "jobName": "web-transcribe-...",
+  "speakers": [
+    {
+      "speaker": "spk_0",
+      "startTime": "0.0",
+      "endTime": "3.45",
+      "text": "Hello everyone welcome to the meeting."
+    },
+    {
+      "speaker": "spk_1",
+      "startTime": "4.1",
+      "endTime": "6.8",
+      "text": "Let us get started."
+    }
+  ]
+}
+```
+
+---
+
+## AWS Setup
+
+### 1. S3 Buckets
+
+Create two S3 buckets (names must be globally unique):
+
+```bash
+aws s3 mb s3://audio-input-yourname-12345 --region us-east-1
+aws s3 mb s3://audio-output-yourname-12345 --region us-east-1
+```
+
+Update `lambda_function.py` with your bucket names:
+```python
+INPUT_BUCKET  = 'audio-input-yourname-12345'
+OUTPUT_BUCKET = 'audio-output-yourname-12345'
+```
+
+### 2. Lambda Function
+
+- **Runtime:** Python 3.9+
+- **Timeout:** 30 seconds
+- **Memory:** 128 MB
+- **Handler:** `lambda_function.lambda_handler`
+
+Upload `lambda_code/lambda_function.py` as the function code.
+
+### 3. IAM Permissions
+
+Attach this inline policy to the Lambda execution role:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject"],
+      "Resource": [
+        "arn:aws:s3:::audio-input-yourname-12345/*",
+        "arn:aws:s3:::audio-output-yourname-12345/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "transcribe:StartTranscriptionJob",
+        "transcribe:GetTranscriptionJob"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+### 4. API Gateway
+
+1. Create a REST API in API Gateway
+2. Add resources: `/upload`, `/status`, `/result`
+3. Add methods: `POST` on `/upload`, `GET` on `/status` and `/result`
+4. Enable CORS on all resources
+5. Set the Lambda proxy integration on each method
+6. Deploy to a stage (e.g. `prod`)
+7. Update `API_ENDPOINT` in `index.html`:
+```javascript
+const API_ENDPOINT = 'https://<your-api-id>.execute-api.us-east-1.amazonaws.com/prod';
+```
+
+---
+
+## Local Analysis Tool
+
+Use `parse_transcription.py` to analyze raw Transcribe JSON files downloaded from S3:
+
+```bash
+python parse_transcription.py transcription-result.json
+```
+
+**Output includes:**
+- Full transcript text
+- Speaker-separated segments with `[HH:MM:SS - HH:MM:SS]` timestamps
+- Confidence analysis: average, min, max per word, total word count
+
+---
+
+## Supported Audio Formats
+
+| Format | Extension | AWS Media Format |
+|---|---|---|
+| MP3 | `.mp3` | `mp3` |
+| WAV | `.wav` | `wav` |
+| M4A | `.m4a` | `mp4` |
+| MP4 | `.mp4` | `mp4` |
+| FLAC | `.flac` | `flac` |
+| OGG | `.ogg` | `ogg` |
+| WebM (recorded) | `.webm` | `mp3` (fallback) |
+
+---
+
+## Use Cases
+
+| Industry | Use Case |
+|---|---|
+| 🏢 Business | Meeting recordings → searchable text minutes |
+| 🎙️ Podcasting | Auto-generate episode transcripts |
+| ⚖️ Legal | Deposition and hearing transcription |
+| 🎓 Education | Lecture notes and video captions |
+| 🏥 Healthcare | Doctor-patient consultation notes |
+| 📞 Call Centers | Customer call transcription and review |
+
+---
+
+## Running Locally
+
+Open `index.html` directly in any modern browser — no build step needed. Update the `API_ENDPOINT` constant to point to your deployed API Gateway URL.
+
+```javascript
+const API_ENDPOINT = 'https://<your-api-id>.execute-api.us-east-1.amazonaws.com/prod';
+```
+
+For the live recording feature, the browser requires HTTPS or `localhost` to access the microphone (MediaRecorder API security requirement).
+
+---
+
+## Developer
+
+**Sowmya Maakam** — [@Sowmyamaakam](https://github.com/Sowmyamaakam)
